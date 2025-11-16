@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/app/lib/stripe";
+import { getStripe } from "@/app/lib/stripe";
 
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
   if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) return NextResponse.json({ ok: true });
+  const stripe = getStripe();
+  if (!stripe) return NextResponse.json({ ok: true });
   const raw = await req.text();
   try {
     const _event = stripe.webhooks.constructEvent(raw, sig, process.env.STRIPE_WEBHOOK_SECRET);

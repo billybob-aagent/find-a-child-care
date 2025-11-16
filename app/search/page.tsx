@@ -1,8 +1,13 @@
 import Map from "@/app/components/Map";
 import { prisma } from "@/app/lib/prisma";
+import type { Prisma } from "@prisma/client";
+
+export const dynamic = "force-dynamic";
 
 async function getProviders(city?: string) {
-  const where = city ? { location: { city: { contains: city, mode: "insensitive" } } } : {};
+  const where: Prisma.ProviderProfileWhereInput = city
+    ? { location: { is: { city: { contains: city, mode: "insensitive" } } } }
+    : {};
   const providers = await prisma.providerProfile.findMany({
     where,
     include: { location: true },

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { openai } from "@/app/lib/openai";
+import { getOpenAI } from "@/app/lib/openai";
 
 export async function POST(req: Request) {
-  if (!process.env.OPENAI_API_KEY) return NextResponse.json({ reply: "AI not configured." });
+  const openai = getOpenAI();
+  if (!openai) return NextResponse.json({ reply: "AI not configured." });
   const { message } = await req.json();
   const res = await openai.chat.completions.create({
     model: "gpt-4o-mini",
