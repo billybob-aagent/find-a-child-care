@@ -1,25 +1,28 @@
-name: CI
+- uses: actions/checkout@v4
 
-on:
-  pull_request:
-  push:
-    branches: [ feature/** ]
+- uses: actions/setup-node@v4
+  with:
+    node-version: '20'
+    cache: 'npm'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - name: Generate Prisma Client
-        run: npx prisma generate
-      - name: Lint
-        run: npm run lint
-      - name: Build
+- run: npm ci
+
+- name: Clear Prisma cache
+  run: |
+    rm -rf node_modules/.prisma
+    rm -rf ~/.cache/prisma
+
+- name: Generate Prisma Client
+  run: npx prisma generate
+  env:
+    DATABASE_URL: ${{ env.DATABASE_URL }}
+
+- name: Lint
+  run: npm run lint
+
+- name: Build
+  run: npm run build
+
         env:
           NEXT_PUBLIC_APP_URL: http://localhost:3000
         run: npm run build
