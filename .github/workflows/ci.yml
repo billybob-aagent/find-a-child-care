@@ -1,28 +1,46 @@
-- uses: actions/checkout@v4
+name: CI
 
-- uses: actions/setup-node@v4
-  with:
-    node-version: '20'
-    cache: 'npm'
+on:
+  pull_request:
+  push:
+    branches:
+      - feature/**
 
-- run: npm ci
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: '1'
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres'
+      NEXTAUTH_SECRET: test_secret
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000'
+      OPENAI_API_KEY: ''
+      STRIPE_SECRET_KEY: ''
+      STRIPE_WEBHOOK_SECRET: ''
+      STRIPE_PRICE_ID: price_dummy
+      NEXT_PUBLIC_MAPBOX_TOKEN: dummy
+      GOOGLE_CLIENT_ID: dummy
+      GOOGLE_CLIENT_SECRET: dummy
 
-- name: Clear Prisma cache
-  run: |
-    rm -rf node_modules/.prisma
-    rm -rf ~/.cache/prisma
+    steps:
+      - uses: actions/checkout@v4
 
-- name: Generate Prisma Client
-  run: npx prisma generate
-  env:
-    DATABASE_URL: ${{ env.DATABASE_URL }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-- name: Lint
-  run: npm run lint
+      - run: npm ci
 
-- name: Build
-  run: npm run build
-
+      - name: Generate Prisma Client
+        run: npx prisma generate
         env:
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
         run: npm run build
+
