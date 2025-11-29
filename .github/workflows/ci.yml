@@ -1,25 +1,58 @@
-name: CI
+﻿name: CI
 
 on:
   pull_request:
   push:
-    branches: [ feature/** ]
+    branches:
+      - feature/**
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: '1'
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres'
+      NEXTAUTH_SECRET: test_secret
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000'
+      OPENAI_API_KEY: ''
+      STRIPE_SECRET_KEY: ''
+      STRIPE_WEBHOOK_SECRET: ''
+      STRIPE_PRICE_ID: price_dummy
+      NEXT_PUBLIC_MAPBOX_TOKEN: dummy
+      GOOGLE_CLIENT_ID: dummy
+      GOOGLE_CLIENT_SECRET: dummy
+
     steps:
+      # 1️⃣ Checkout the repo
       - uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci
+
+      # 3️⃣ Install dependencies (all devDependencies included)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4️⃣ Clear any Prisma cache to avoid stale config errors
+      - name: Clear Prisma cache
+        run: |
+          rm -rf node_modules/.prisma
+          rm -rf ~/.cache/prisma
+
+      # 5️⃣ Generate Prisma Client
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      # 6️⃣ Run linter
       - name: Lint
         run: npm run lint
+
+      # 7️⃣ Build Next.js app
       - name: Build
-        env:
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
         run: npm run build
