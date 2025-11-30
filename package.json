@@ -3,14 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "scripts": {
-      "dev": "next dev",
-      "build": "next build",
-      "start": "next start",
-      "lint": "next lint",
-      "prepare": "if [ \"$CI\" = \"true\" ]; then echo 'Skipping husky in CI'; else npx husky install; fi"
-    }
-
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prepare": "if [ \"$CI\" = \"true\" ]; then echo 'Skipping husky in CI'; else npx husky install; fi"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
